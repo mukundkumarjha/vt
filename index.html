@@ -96,11 +96,14 @@ const yesBtn = document.getElementById("yesBtn");
 const message = document.getElementById("message");
 
 // Move No button
-noBtn.addEventListener("mouseover", function() {
-    const x = Math.random() * (window.innerWidth - 100);
-    const y = Math.random() * (window.innerHeight - 50);
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
+noBtn.addEventListener("mouseenter", function() {
+    const maxX = 200;  // how far it can move left/right
+    const maxY = 100;  // how far it can move up/down
+
+    const randomX = (Math.random() - 0.5) * maxX;
+    const randomY = (Math.random() - 0.5) * maxY;
+
+    noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
 });
 
 // Yes click
