@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Be My Valentine 💖</title>
+<title>Our Little Story 💖</title>
 
 <style>
 body {
     margin: 0;
     min-height: 100svh;
-    overflow: hidden;
     font-family: 'Comic Sans MS', cursive;
     background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #ffdde1, #ffc3a0);
     background-size: 400% 400%;
@@ -17,6 +16,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 @keyframes gradientBG {
@@ -25,15 +25,40 @@ body {
     100% {background-position: 0% 50%;}
 }
 
-.container {
+/* ---------- CINEMATIC INTRO ---------- */
+#intro {
+    position: fixed;
+    inset: 0;
+    background: black;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    display: none;
-    padding: 20px;
-    animation: fadeIn 1s ease forwards;
+    z-index: 1000;
+    padding: 30px;
+}
+
+#introText {
+    font-size: 1.8rem;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeIn 1.5s forwards;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; }
+}
+
+/* ---------- MAIN CONTENT ---------- */
+.container {
+    text-align: center;
+    display: none;
+    animation: zoomIn 1.2s ease forwards;
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }
 }
 
@@ -75,39 +100,7 @@ button:hover {
     margin-top: 20px;
 }
 
-/* Start screen */
-#startScreen {
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(135deg, #ff69b4, #ff1493);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 2rem;
-    cursor: pointer;
-    z-index: 999;
-    text-align: center;
-}
-
-/* Sparkles */
-.sparkle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: white;
-    border-radius: 50%;
-    opacity: 0.8;
-    animation: sparkleAnim 3s infinite;
-}
-
-@keyframes sparkleAnim {
-    0% { opacity: 0.2; }
-    50% { opacity: 1; }
-    100% { opacity: 0.2; }
-}
-
-/* Premium Confetti */
+/* ---------- CONFETTI ---------- */
 .confetti-piece {
     position: fixed;
     width: 10px;
@@ -120,17 +113,11 @@ button:hover {
 }
 
 @keyframes confettiFall {
-    0% {
-        transform: translate(0, 0) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--x), 100vh) rotate(720deg);
-        opacity: 0;
-    }
+    0% { transform: translate(0,0) rotate(0deg); }
+    100% { transform: translate(var(--x), 100vh) rotate(720deg); opacity: 0; }
 }
 
-/* Mobile */
+/* ---------- MOBILE ---------- */
 @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     button {
@@ -144,8 +131,12 @@ button:hover {
 
 <body>
 
-<div id="startScreen">Tap anywhere to start 💕</div>
+<!-- CINEMATIC INTRO -->
+<div id="intro">
+    <div id="introText"></div>
+</div>
 
+<!-- MAIN -->
 <div class="container">
     <h1>Will you be my Valentine? 💖</h1>
     <button id="yesBtn">Yes 😍</button>
@@ -158,7 +149,8 @@ button:hover {
 </audio>
 
 <script>
-const startScreen = document.getElementById("startScreen");
+const intro = document.getElementById("intro");
+const introText = document.getElementById("introText");
 const container = document.querySelector(".container");
 const music = document.getElementById("bgMusic");
 const noBtn = document.getElementById("noBtn");
@@ -167,19 +159,51 @@ const message = document.getElementById("message");
 
 let noAttempts = 0;
 
-// Start site
-startScreen.addEventListener("click", () => {
+const storyLines = [
+    "From the moment our paths crossed...",
+    "Every smile felt a little brighter ✨",
+    "Every moment felt a little warmer 💕",
+    "And now there's just one question left..."
+];
+
+let lineIndex = 0;
+let charIndex = 0;
+
+function typeStory() {
+    if (charIndex < storyLines[lineIndex].length) {
+        introText.innerHTML += storyLines[lineIndex].charAt(charIndex);
+        charIndex++;
+        setTimeout(typeStory, 60);
+    } else {
+        setTimeout(() => {
+            introText.innerHTML = "";
+            charIndex = 0;
+            lineIndex++;
+            if (lineIndex < storyLines.length) {
+                typeStory();
+            } else {
+                startMain();
+            }
+        }, 1200);
+    }
+}
+
+function startMain() {
+    intro.style.display = "none";
+    container.style.display = "block";
     music.volume = 0.5;
     music.play();
-    startScreen.style.display = "none";
-    container.style.display = "block";
-    createSparkles();
+}
+
+// Start typing on first tap (Safari safe)
+intro.addEventListener("click", () => {
+    introText.innerHTML = "";
+    typeStory();
 });
 
-// Move No button + Click messages
+// No button logic
 function moveNo() {
     noAttempts++;
-
     const x = (Math.random() - 0.5) * 150;
     const y = (Math.random() - 0.5) * 100;
     noBtn.style.transform = `translate(${x}px, ${y}px)`;
@@ -187,11 +211,10 @@ function moveNo() {
     if (noAttempts === 1) {
         message.innerHTML = "I think you clicked the wrong button 💔";
     } else if (noAttempts <= 5) {
-        message.innerHTML = "Hey !! Stop being mean 😭";
+        message.innerHTML = "Hey… that hurts 😭";
     } else {
-        message.innerHTML = "Okay that's enough 😭 stop breaking my heart 💔";
+        message.innerHTML = "Okay stop 😭 my heart can’t take this 💔";
     }
-
     message.style.display = "block";
 }
 
@@ -200,41 +223,20 @@ noBtn.addEventListener("touchstart", moveNo);
 
 // Yes click
 yesBtn.addEventListener("click", () => {
-    message.innerHTML = "YAYYYY 🥰 You just made me so happy 💕";
+    message.innerHTML = "YAYYYY 🥰 You just made my world brighter 💕";
     message.style.display = "block";
     launchConfetti();
 });
 
-// Premium Confetti
 function launchConfetti() {
     const colors = ["#ff4d6d", "#ff85a2", "#ffd6ff", "#ffb3c1", "#ff69b4"];
-
     for (let i = 0; i < 120; i++) {
-        const confetti = document.createElement("div");
-        confetti.classList.add("confetti-piece");
-
-        const size = Math.random() * 8 + 6;
-        confetti.style.width = size + "px";
-        confetti.style.height = size * 1.4 + "px";
-        confetti.style.background =
-            colors[Math.floor(Math.random() * colors.length)];
-
-        const randomX = (Math.random() - 0.5) * 800;
-        confetti.style.setProperty("--x", randomX + "px");
-
-        document.body.appendChild(confetti);
-        setTimeout(() => confetti.remove(), 3000);
-    }
-}
-
-// Sparkles
-function createSparkles() {
-    for (let i = 0; i < 40; i++) {
-        let sp = document.createElement("div");
-        sp.classList.add("sparkle");
-        sp.style.top = Math.random() * 100 + "vh";
-        sp.style.left = Math.random() * 100 + "vw";
-        document.body.appendChild(sp);
+        const conf = document.createElement("div");
+        conf.classList.add("confetti-piece");
+        conf.style.background = colors[Math.floor(Math.random()*colors.length)];
+        conf.style.setProperty("--x", (Math.random()-0.5)*800 + "px");
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 3000);
     }
 }
 </script>
