@@ -63,12 +63,11 @@ button {
 
 #message {
     display: none;
-    font-size: 28px;
+    font-size: 26px;
     color: white;
     margin-top: 20px;
 }
 
-/* Start screen */
 #startScreen {
     position: fixed;
     inset: 0;
@@ -82,7 +81,6 @@ button {
     z-index: 999;
 }
 
-/* Floating hearts */
 .heart {
     position: absolute;
     animation: floatUp 6s linear infinite;
@@ -103,11 +101,11 @@ button {
     <h1>Will you be my Valentine? 💖</h1>
     <button id="yesBtn">Yes 😍</button>
     <button id="noBtn">No 🙈</button>
-    <div id="message">YAYYYY 🥰💍 You just made me the happiest person alive 💕</div>
+    <div id="message"></div>
 </div>
 
 <audio id="bgMusic" loop>
-    <source src="https://pixabay.com/static/uploads/audio/2022/03/30/romantic-melody-156913.mp3" type="audio/mp3">
+    <source src="music" type="audio/mp3">
 </audio>
 
 <script>
@@ -119,27 +117,41 @@ const yesBtn = document.getElementById("yesBtn");
 const message = document.getElementById("message");
 
 let yesScale = 1;
+let noAttempts = 0;
 
-// Start site + play music (Safari compatible)
+// Start site + play music (Safari safe)
 startScreen.addEventListener("click", () => {
-    music.volume = 0.4;
+    music.volume = 0.5;
     music.play();
     startScreen.style.display = "none";
     container.style.display = "block";
 });
 
-// No button shifts slightly but stays visible
+// No button moves slightly on hover
 noBtn.addEventListener("mouseenter", () => {
-    const randomX = (Math.random() - 0.5) * 150;
-    const randomY = (Math.random() - 0.5) * 100;
+    noAttempts++;
+
+    const randomX = (Math.random() - 0.5) * 180;
+    const randomY = (Math.random() - 0.5) * 120;
     noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
 
     yesScale += 0.1;
     yesBtn.style.transform = `scale(${yesScale})`;
+
+    if (noAttempts === 1) {
+        message.innerHTML = "Hey 🥶 I think you clicked the wrong button 💔";
+    } else if (noAttempts <= 5) {
+        message.innerHTML = "Hey !! Stop being mean 😭";
+    } else {
+        message.innerHTML = "Okay that's enough 😭 stop breaking my heart 💔";
+    }
+
+    message.style.display = "block";
 });
 
 // Yes clicked
 yesBtn.addEventListener("click", () => {
+    message.innerHTML = "YAYYYY 🥰💍 You just made me the happiest person alive 💕";
     message.style.display = "block";
     startConfetti();
 });
