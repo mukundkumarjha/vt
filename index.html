@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Be My Valentine 💕</title>
+<title>Be My Valentine 💖</title>
 
 <style>
 body {
@@ -27,8 +27,7 @@ body {
 
 .container {
     text-align: center;
-    position: relative;
-    z-index: 2;
+    display: none;
 }
 
 h1 {
@@ -50,7 +49,6 @@ button {
 #yesBtn {
     background: #ff4b5c;
     color: white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 #yesBtn:hover {
@@ -60,7 +58,7 @@ button {
 #noBtn {
     background: white;
     color: #ff4b5c;
-    position: absolute;
+    position: relative;
 }
 
 #message {
@@ -68,35 +66,38 @@ button {
     font-size: 28px;
     color: white;
     margin-top: 20px;
-    animation: pop 0.6s ease forwards;
 }
 
-@keyframes pop {
-    0% {transform: scale(0);}
-    100% {transform: scale(1);}
+/* Start screen */
+#startScreen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 999;
 }
 
 /* Floating hearts */
 .heart {
     position: absolute;
-    color: white;
     animation: floatUp 6s linear infinite;
 }
 
 @keyframes floatUp {
-    0% {
-        transform: translateY(100vh);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-10vh);
-        opacity: 0;
-    }
+    0% { transform: translateY(100vh); opacity: 1; }
+    100% { transform: translateY(-10vh); opacity: 0; }
 }
 </style>
 </head>
 
 <body>
+
+<div id="startScreen">Tap anywhere to start 💕</div>
 
 <div class="container">
     <h1>Will you be my Valentine? 💖</h1>
@@ -105,42 +106,43 @@ button {
     <div id="message">YAYYYY 🥰💍 You just made me the happiest person alive 💕</div>
 </div>
 
-<!-- Romantic instrumental music -->
 <audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1e9f2a6.mp3?filename=romantic-background-110624.mp3" type="audio/mp3">
+    <source src="https://pixabay.com/static/uploads/audio/2022/03/30/romantic-melody-156913.mp3" type="audio/mp3">
 </audio>
 
 <script>
+const startScreen = document.getElementById("startScreen");
+const container = document.querySelector(".container");
+const music = document.getElementById("bgMusic");
 const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
 const message = document.getElementById("message");
 
 let yesScale = 1;
 
-// No button shifts slightly
-noBtn.addEventListener("mouseenter", function() {
-    const randomX = (Math.random() - 0.5) * 200;
-    const randomY = (Math.random() - 0.5) * 150;
+// Start site + play music (Safari compatible)
+startScreen.addEventListener("click", () => {
+    music.volume = 0.4;
+    music.play();
+    startScreen.style.display = "none";
+    container.style.display = "block";
+});
+
+// No button shifts slightly but stays visible
+noBtn.addEventListener("mouseenter", () => {
+    const randomX = (Math.random() - 0.5) * 150;
+    const randomY = (Math.random() - 0.5) * 100;
     noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
 
-    // Make Yes button grow
     yesScale += 0.1;
     yesBtn.style.transform = `scale(${yesScale})`;
 });
 
 // Yes clicked
-yesBtn.addEventListener("click", function() {
+yesBtn.addEventListener("click", () => {
     message.style.display = "block";
     startConfetti();
 });
-
-yesBtn.addEventListener("click", function() {
-    message.style.display = "block";
-    music.volume = 0.4;
-    music.play();
-    startConfetti();
-});
-
 
 // Floating hearts
 function createHeart() {
@@ -152,11 +154,11 @@ function createHeart() {
     document.body.appendChild(heart);
     setTimeout(() => heart.remove(), 6000);
 }
-setInterval(createHeart, 300);
+setInterval(createHeart, 400);
 
-// Simple confetti
+// Confetti
 function startConfetti() {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 80; i++) {
         let confetti = document.createElement("div");
         confetti.innerHTML = "🎉";
         confetti.style.position = "absolute";
@@ -168,15 +170,6 @@ function startConfetti() {
         setTimeout(() => confetti.remove(), 3000);
     }
 }
-const music = document.getElementById("bgMusic");
-
-// Play music on first user interaction
-document.addEventListener("click", function startMusic() {
-    music.volume = 0.3;
-    music.play();
-    document.removeEventListener("click", startMusic);
-});
-
 </script>
 
 </body>
