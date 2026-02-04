@@ -11,7 +11,7 @@ body {
     min-height: 100svh;
     overflow: hidden;
     font-family: 'Comic Sans MS', cursive;
-    background: linear-gradient(-45deg, #ffd1dc, #ffc0cb, #ffb6c1, #ffccd5);
+    background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #ffdde1, #ffc3a0);
     background-size: 400% 400%;
     animation: gradientBG 8s ease infinite;
     display: flex;
@@ -29,11 +29,23 @@ body {
     text-align: center;
     display: none;
     padding: 20px;
+    animation: fadeIn 1s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 h1 {
     font-size: 3rem;
     color: #c2185b;
+    animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.07); }
 }
 
 button {
@@ -43,9 +55,9 @@ button {
     border-radius: 50px;
     cursor: pointer;
     margin: 20px;
-    transition: all 0.3s ease;
     background: #ff69b4;
     color: white;
+    transition: 0.3s;
 }
 
 button:hover {
@@ -59,10 +71,11 @@ button:hover {
 #message {
     display: none;
     font-size: 24px;
-    color: #b0003a;
+    color: #ad1457;
     margin-top: 20px;
 }
 
+/* Start screen */
 #startScreen {
     position: fixed;
     inset: 0;
@@ -75,24 +88,51 @@ button:hover {
     cursor: pointer;
     z-index: 999;
     text-align: center;
-    padding: 20px;
 }
 
-/* Floating hearts */
-.heart {
+/* Sparkles */
+.sparkle {
     position: absolute;
-    animation: floatUp 6s linear infinite;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: sparkleAnim 3s infinite;
 }
 
-@keyframes floatUp {
-    0% { transform: translateY(100vh); opacity: 1; }
-    100% { transform: translateY(-10vh); opacity: 0; }
+@keyframes sparkleAnim {
+    0% { opacity: 0.2; }
+    50% { opacity: 1; }
+    100% { opacity: 0.2; }
+}
+
+/* Premium Confetti */
+.confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 14px;
+    top: 50%;
+    left: 50%;
+    opacity: 0.9;
+    pointer-events: none;
+    animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--x), 100vh) rotate(720deg);
+        opacity: 0;
+    }
 }
 
 /* Mobile */
 @media (max-width: 600px) {
     h1 { font-size: 2rem; }
-
     button {
         display: block;
         width: 80%;
@@ -127,23 +167,25 @@ const message = document.getElementById("message");
 
 let noAttempts = 0;
 
-// Start site + play music
+// Start site
 startScreen.addEventListener("click", () => {
     music.volume = 0.5;
     music.play();
     startScreen.style.display = "none";
     container.style.display = "block";
+    createSparkles();
 });
 
-function moveNoButton() {
+// Move No button + Click messages
+function moveNo() {
     noAttempts++;
 
-    const randomX = (Math.random() - 0.5) * 150;
-    const randomY = (Math.random() - 0.5) * 100;
-    noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    const x = (Math.random() - 0.5) * 150;
+    const y = (Math.random() - 0.5) * 100;
+    noBtn.style.transform = `translate(${x}px, ${y}px)`;
 
     if (noAttempts === 1) {
-        message.innerHTML = "I think you tapped the wrong button 💔";
+        message.innerHTML = "I think you clicked the wrong button 💔";
     } else if (noAttempts <= 5) {
         message.innerHTML = "Hey !! Stop being mean 😭";
     } else {
@@ -153,43 +195,46 @@ function moveNoButton() {
     message.style.display = "block";
 }
 
-// Desktop
-noBtn.addEventListener("mouseenter", moveNoButton);
+noBtn.addEventListener("mouseenter", moveNo);
+noBtn.addEventListener("touchstart", moveNo);
 
-// Mobile
-noBtn.addEventListener("touchstart", moveNoButton);
-
-// Yes clicked
+// Yes click
 yesBtn.addEventListener("click", () => {
     message.innerHTML = "YAYYYY 🥰 You just made me so happy 💕";
     message.style.display = "block";
-    startConfetti();
+    launchConfetti();
 });
 
-// Floating hearts
-function createHeart() {
-    const heart = document.createElement("div");
-    heart.classList.add("heart");
-    heart.innerHTML = "💖";
-    heart.style.left = Math.random() * 100 + "vw";
-    heart.style.fontSize = Math.random() * 20 + 15 + "px";
-    document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 6000);
-}
-setInterval(createHeart, 400);
+// Premium Confetti
+function launchConfetti() {
+    const colors = ["#ff4d6d", "#ff85a2", "#ffd6ff", "#ffb3c1", "#ff69b4"];
 
-// Confetti
-function startConfetti() {
-    for (let i = 0; i < 60; i++) {
-        let confetti = document.createElement("div");
-        confetti.innerHTML = "💗";
-        confetti.style.position = "absolute";
-        confetti.style.left = Math.random() * 100 + "vw";
-        confetti.style.top = "-10px";
-        confetti.style.fontSize = "20px";
-        confetti.style.animation = "floatUp 3s linear forwards";
+    for (let i = 0; i < 120; i++) {
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti-piece");
+
+        const size = Math.random() * 8 + 6;
+        confetti.style.width = size + "px";
+        confetti.style.height = size * 1.4 + "px";
+        confetti.style.background =
+            colors[Math.floor(Math.random() * colors.length)];
+
+        const randomX = (Math.random() - 0.5) * 800;
+        confetti.style.setProperty("--x", randomX + "px");
+
         document.body.appendChild(confetti);
         setTimeout(() => confetti.remove(), 3000);
+    }
+}
+
+// Sparkles
+function createSparkles() {
+    for (let i = 0; i < 40; i++) {
+        let sp = document.createElement("div");
+        sp.classList.add("sparkle");
+        sp.style.top = Math.random() * 100 + "vh";
+        sp.style.left = Math.random() * 100 + "vw";
+        document.body.appendChild(sp);
     }
 }
 </script>
